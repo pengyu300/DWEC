@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Catálogo Dinámico de Productos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #fafafa;
+    }
+
+    /* Botón para mostrar/ocultar el formulario */
+    #btnAddProduct {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    /* Contenedor del formulario (oculto inicialmente) */
+    #productFormContainer {
+      display: none;
+      border: 1px solid #ccc;
+      padding: 15px;
+      width: 320px;
+      background: #fff;
+      margin-bottom: 20px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    /* Estilos para los inputs con error */
+    .input-error {
+      border-color: red;
+    }
+
+    /* Mensajes de error en rojo */
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+
+    /* catálogo */
+    #catalogo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    /* Tarjeta individual de producto */
+    .product-card {
+      border: 1px solid #999;
+      padding: 10px;
+      width: 150px;
+      background-color: #fff;
+      position: relative;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    }
+
+    /* Efecto al pasar el ratón sobre la tarjeta */
+    .product-card:hover {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      transform: translateY(-5px);
+    }
+
+    /* Imagen dentro de la tarjeta */
+    .product-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Nombre visible solo al hacer hover */
+    .product-name-hover {
+      display: none;
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 14px;
+      padding: 3px 5px;
+      text-align: center;
+      user-select: none;
+    }
+
+    /* Mostrar el nombre al hacer hover en la tarjeta */
+    .product-card:hover .product-name-hover {
+      display: block;
+    }
+
+    /* Div de detalles (oculto inicialmente) */
+    .details {
+      margin-top: 10px;
+      font-size: 13px;
+      background-color: #f9f9f9;
+      padding: 5px;
+      border: 1px solid #ccc;
+      text-align: left;
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botón para mostrar/ocultar el formulario -->
+  <button id="btnAddProduct">Añadir producto</button>
+
+  <!-- Contenedor del formulario -->
+  <div id="productFormContainer">
+    <form id="productForm">
+      <!-- Campo para ID Producto -->
+      <label for="productId">ID Producto:</label><br />
+      <input type="text" id="productId" name="productId" />
+      <div class="error" id="errorId"></div>
+
+      <!-- Campo para Nombre -->
+      <label for="productName">Nombre:</label><br />
+      <input type="text" id="productName" name="productName" />
+      <div class="error" id="errorName"></div>
+
+      <!-- Campo para Descripción -->
+      <label for="productDescription">Descripción:</label><br />
+      <textarea id="productDescription" name="productDescription" rows="3"></textarea>
+      <div class="error" id="errorDescription"></div>
+
+      <!-- Campo para Precio -->
+      <label for="productPrice">Precio:</label><br />
+      <input type="number" id="productPrice" name="productPrice" step="0.01" />
+      <div class="error" id="errorPrice"></div>
+
+      <!-- Campo para seleccionar Imagen -->
+      <label for="productImage">Imagen:</label><br />
+      <input type="file" id="productImage" name="productImage" accept="image/*" />
+      <div class="error" id="errorImage"></div>
+
+      <br />
+      <button type="submit">Crear producto</button>
+    </form>
+  </div>
+
+  <!-- Contenedor para mostrar las tarjetas de productos -->
+  <div id="catalogo"></div>
+
+  <script>
+    // Referencias a elementos DOM
+    const btnAddProduct = document.getElementById("btnAddProduct");
+    const formContainer = document.getElementById("productFormContainer");
+    const productForm = document.getElementById("productForm");
+    const catalogo = document.getElementById("catalogo");
+
+    // Set para asegurar IDs únicos
+    const productIds = new Set();
+
+    // Mostrar u ocultar el formulario al pulsar el botón
+    // Si está visible, lo oculta
+    // Si está oculto, lo muestra
+    btnAddProduct.addEventListener("click", () => {
+      if (formContainer.style.display === "block") {
+        formContainer.style.display = "none";
+      } else {
+        formContainer.style.display = "block";
+      }
+    });
+
+    // Función para validar los datos del formulario
+    function validar(data) {
+      let esValido = true;
+
+      // Limpiar mensajes y estilos anteriores
+      // Recorre cada uno de los IDs, y vacía los contenedores de texto que muestran las advertencias
+      ["errorId", "errorName", "errorDescription", "errorPrice", "errorImage"].forEach(id => {
+        document.getElementById(id).textContent = "";
+      });
+      // si aplica input-error, remove el estilo, dejando el campo normal
+      ["productId", "productName", "productDescription", "productPrice", "productImage"].forEach(id => {
+        document.getElementById(id).classList.remove("input-error");
+      }); 
+
+      // Validar ID obligatorio y único
+      if (!data.id.trim()) {
+        document.getElementById("errorId").textContent = "El ID es obligatorio.";
+        document.getElementById("productId").classList.add("input-error");
+        esValido = false;
+      } else if (productIds.has(data.id.trim())) {
+        document.getElementById("errorId").textContent = "El ID debe ser único.";
+        document.getElementById("productId").classList.add("input-error");
+        esValido = false;
+      }
+
+      // Validar nombre obligatorio
+      if (!data.name.trim()) {
+        document.getElementById("errorName").textContent = "El nombre es obligatorio.";
+        document.getElementById("productName").classList.add("input-error");
+        esValido = false;
+      }
+
+      // Validar precio positivo numérico
+      if (isNaN(data.price) || data.price <= 0) {
+        document.getElementById("errorPrice").textContent = "El precio debe ser un número positivo.";
+        document.getElementById("productPrice").classList.add("input-error");
+        esValido = false;
+      }
+
+      // Validar que imagen esté seleccionada
+      if (!data.imageFile) {
+        document.getElementById("errorImage").textContent = "Debe seleccionar una imagen.";
+        document.getElementById("productImage").classList.add("input-error");
+        esValido = false;
+      }
+
+      return esValido;
+    }
+
+    // Función para crear y añadir la tarjeta del producto al catálogo
+    function crearProductoAlCatalogo(product) {
+      const tarjeta = document.createElement("div");
+      tarjeta.className = "product-card";
+
+      // Imagen: se usa URL temporal para mostrar la imagen seleccionada
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(product.imageFile); // crear una cadena de URL única y temporal
+      img.alt = product.name;
+
+      // Nombre que se muestra solo al hacer hover
+      const nombreHover = document.createElement("div");
+      nombreHover.className = "product-name-hover";
+      nombreHover.textContent = product.name;
+
+      // Añadir imagen y nombre hover a la tarjeta
+      tarjeta.appendChild(img);
+      tarjeta.appendChild(nombreHover);
+
+      // Div para detalles que aparecen al hacer clic
+      const detallesDiv = document.createElement("div");
+      detallesDiv.className = "details";
+      detallesDiv.style.display = "none"; // Oculto inicialmente
+      tarjeta.appendChild(detallesDiv);
+
+      // Evento clic en la imagen para mostrar u ocultar detalles
+      img.addEventListener("click", () => {
+        if (detallesDiv.style.display === "none") {
+          detallesDiv.innerHTML = `
+            <strong>ID Producto:</strong> ${product.id}<br />
+            <strong>Nombre:</strong> ${product.name}<br />
+            <strong>Precio:</strong> $${product.price.toFixed(2)}<br />
+            <strong>Descripción:</strong> ${product.description}
+          `;
+          detallesDiv.style.display = "block";
+        } else {
+          detallesDiv.style.display = "none";
+        }
+      });
+
+      // Evento para eliminar producto con botón derecho (menú contextual)
+      tarjeta.addEventListener("contextmenu", (e) => {
+        e.preventDefault(); // Evitar menú contextual predeterminado
+        if (confirm(`¿Eliminar el producto "${product.name}"?`)) {
+          catalogo.removeChild(tarjeta);
+          productIds.delete(product.id.trim());
+        }
+      });
+
+      // Añadir la tarjeta al catálogo
+      catalogo.appendChild(tarjeta);
+    }
+
+    // Evento al enviar el formulario
+    productForm.addEventListener("submit", (e) => {
+      e.preventDefault(); // Evitar recarga de página
+
+      // Recoger datos del formulario
+      const id = productForm.productId.value;
+      const name = productForm.productName.value;
+      const description = productForm.productDescription.value;
+      const price = parseFloat(productForm.productPrice.value);
+      const imageFile = productForm.productImage.files[0];
+
+      const datosProducto = { id, name, description, price, imageFile };
+
+      // Validar datos
+      if (validar(datosProducto)) {
+        // Añadir ID al set para controlar unicidad
+        productIds.add(id.trim());
+
+        // Crear tarjeta y añadirla al catálogo
+        crearProductoAlCatalogo(datosProducto);
+
+        // Limpiar formulario y ocultarlo
+        productForm.reset();
+        formContainer.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
+
+  
