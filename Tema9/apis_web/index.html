@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa interactivo</title>
+
+    <!--Leaflet CSS-->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+      crossorigin=""
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h2>Mapa interactivo</h2>
+
+    <!-- Inputs para las coordenadas -->
+    <div id="panel">
+      <label>
+        Latitud:
+        <input type="text" id="lat" readonly />
+      </label>
+      <label>
+        Longitud:
+        <input type="text" id="lng" readonly />
+      </label>
+      <button onclick="borrarDatos()">Borrar Datos</button>
+    </div>
+  </body>
+
+  <!-- Contenedor del Mapa -->
+  <div id="map"></div>
+
+  <!-- Canvas para la visualización gráfica -->
+  <h3>Representación en Canvas (Ruta)</h3>
+  <canvas id="miCanvas" width="800" height="400"></canvas>
+
+  <!-- Script de Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Mi script -->
+  <script src="script.js"></script>
+</html>
